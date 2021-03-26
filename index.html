@@ -46,6 +46,7 @@ var vieJoueur = 3;
 var recovery = false;
 var timerRecovery = 0;
 var powerUp;
+var powerUpTime;
 var cursors;
 var toucheSol = false;
 var doubleJump = false;
@@ -59,11 +60,18 @@ function preload ()
 {
     this.load.image('background', 'assets/background.png');
     this.load.spritesheet('player', 'assets/player.png', { frameWidth: 28, frameHeight: 38 });
-    this.load.image('ground', 'assets/normal.png');
-    this.load.image('snowyground', 'assets/neige.png');
-    this.load.image('icyground', 'assets/glace.png');
-    this.load.spritesheet('powerupslot', 'assets/powerupslot.png', { frameWidth: 106, frameHeight: 106});
-    this.load.image('powerup', 'assets/powerup.png');
+    this.load.image('ground', 'assets/normal_sol.png');
+    this.load.image('ground', 'assets/normal_mur_gauche.png');
+    this.load.image('ground', 'assets/normal_mur_droite.png');
+    this.load.image('snowyground', 'assets/neige_sol.png');
+    this.load.image('snowyground', 'assets/neige_mur_gauche.png');
+    this.load.image('snowyground', 'assets/neige_mur_droite.png');
+    this.load.image('icyground', 'assets/glace_sol.png');
+    this.load.image('icyground', 'assets/glace_mur_gauche.png');
+    this.load.image('icyground', 'assets/glace_mur_droite.png');
+    this.load.image('powerUpSlotOff', 'assets/power_up_slot_off.png')
+    this.load.image('powerUpSlotOn', 'assets/power_up_slot_on.png')
+    this.load.image('powerUp', 'assets/powerup.png');
     this.load.spritesheet('vie', 'assets/vie.png', { frameWidth: 161, frameHeight: 46 });
     this.load.image('flocon1', 'assets/flocon1.png');
     this.load.image('flocon2', 'assets/flocon2.png');
@@ -91,9 +99,13 @@ function create ()
     // Platformes
     
     platforms = this.physics.add.staticGroup();
+    snowy_platforms = this.physics.add.staticGroup();
+    icy_platforms = this.physics.add.staticGroup();
     
-    platforms.create(400, 800, 'ground').setScale(2).refreshBody();
-    platforms.create(600, 400, 'icyground');
+    platforms.create(100, 800, 'ground').refreshBody();
+    platforms.create(300, 800, 'ground').refreshBody();
+    snowy_platforms.create(500, 800, 'snowyground').refreshBody();
+    icy_platforms.create(600, 400, 'icyground');
     platforms.create(50, 250, 'ground');
     platforms.create(750, 220, 'ground');
 
@@ -107,12 +119,17 @@ function create ()
     enemy.create(200, 650, 'flocon1');
     
     
+    // Power-up
+    
+    powerUp = this.physics.add.staticGroup();
+    powerUp.create(50, 650, 'powerUp');
+    
+    
     // Interface
     
     barreDeVie = this.physics.add.sprite(100, 40, 'vie').setScrollFactor(0,0);
     barreDeVie.body.setAllowGravity(false);
-    powerUpSlot = this.physics.add.sprite(1210, 650, 'powerupslot').setScrollFactor(0,0);
-    powerUpSlot.body.setAllowGravity(false);   
+    powerUpSlot = this.add.image(1210, 650, 'powerUpSlotOff').setScrollFactor(0,0);  
     
     
     // Caméras
@@ -147,9 +164,17 @@ function create ()
     
     // Collisions
     
-    this.physics.add.collider(player, platforms, resetJump, glissade);
+    this.physics.add.collider(player, platforms, resetJump);
+    this.physics.add.collider(player, snowy_platforms, resetJump);
+    this.physics.add.collider(player, icy_platforms, resetJump);
     this.physics.add.collider(enemy, player, hitEnemy);
     this.physics.add.collider(enemy, platforms);
+    this.physics.add.collider(enemy, snowy_platforms);
+    this.physics.add.collider(enemy, icy_platforms);
+    this.physics.add.collider(powerUp, platforms);
+    this.physics.add.collider(powerUp, snowy_platforms);
+    this.physics.add.collider(powerUp, icy_platforms);
+    this.physics.add.overlap(player, powerUp, collectPowerUp);
     
     
     this.anims.create({
@@ -171,6 +196,7 @@ function create ()
         key: 'dead',
         frames: [ { key: 'vie', frame: 3. } ],
     });
+    
 ;}
 
     
@@ -327,14 +353,6 @@ function resetJump (player, platforms)
         }
 }
     
-function glissade (player, platforms)
-{
-    if (player.body.touching.down)
-        {
-            player.setVelocity(-100);
-        }
-}
-
     
 // Collision ennemis
     
@@ -360,12 +378,15 @@ function hitEnemy (enemy, player)
 
         else if (vieJoueur <= 0){
             barreDeVie.anims.play('dead');
-            this.physics.pause();
-            player.setTint(0xff0000);
-            player.anims.play('turn');
             gameOver = true;
       }
    
+}
+    
+function collectPowerUp (player, powerUp)
+{
+    powerUp.disableBody(true, true);
+    powerUpSlot.setTexture('powerUpSlotOn');
 }
     
 </script>
