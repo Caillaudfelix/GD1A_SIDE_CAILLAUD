@@ -62,14 +62,14 @@ function preload ()
     this.load.image('background', 'assets/background.png');
     this.load.spritesheet('player', 'assets/player.png', { frameWidth: 28, frameHeight: 38 });
     this.load.image('ground', 'assets/normal_sol.png');
-    this.load.image('ground', 'assets/normal_mur_gauche.png');
-    this.load.image('ground', 'assets/normal_mur_droite.png');
+    this.load.image('groundwallleft', 'assets/normal_mur_gauche.png');
+    this.load.image('groundwallright', 'assets/normal_mur_droite.png');
     this.load.image('snowyground', 'assets/neige_sol.png');
-    this.load.image('snowyground', 'assets/neige_mur_gauche.png');
-    this.load.image('snowyground', 'assets/neige_mur_droite.png');
+    this.load.image('snowygroundwallleft', 'assets/neige_mur_gauche.png');
+    this.load.image('snowygroundwallright', 'assets/neige_mur_droite.png');
     this.load.image('icyground', 'assets/glace_sol.png');
-    this.load.image('icyground', 'assets/glace_mur_gauche.png');
-    this.load.image('icyground', 'assets/glace_mur_droite.png');
+    this.load.image('icygroundwallleft', 'assets/glace_mur_gauche.png');
+    this.load.image('icygroundwallright', 'assets/glace_mur_droite.png');
     this.load.image('powerUpSlotOff', 'assets/power_up_slot_off.png')
     this.load.image('powerUpSlotOn', 'assets/power_up_slot_on.png')
     this.load.image('powerUp', 'assets/powerup.png');
@@ -103,27 +103,115 @@ function create ()
     snowy_platforms = this.physics.add.staticGroup();
     icy_platforms = this.physics.add.staticGroup();
     
-    platforms.create(100, 800, 'ground').refreshBody();
-    platforms.create(300, 800, 'ground').refreshBody();
-    snowy_platforms.create(500, 800, 'snowyground');
-    icy_platforms.create(600, 400, 'icyground');
-    platforms.create(50, 250, 'ground');
-    platforms.create(750, 220, 'ground');
-
+    platforms.create(100, 1415, 'ground');
+    platforms.create(300, 1415, 'ground');
+    platforms.create(600, 1300, 'ground');
+    snowy_platforms.create(800, 1300, 'snowyground');
+    snowy_platforms.create(1000, 1200, 'snowyground');
+    platforms.create(1125, 1125, 'groundwallright'); 
+    platforms.create(975, 1000, 'groundwallleft');
+    platforms.create(1125, 925, 'groundwallright');
+    platforms.create(975, 800, 'groundwallleft');
+    platforms.create(1125, 725, 'groundwallright');
+    platforms.create(1125, 525, 'groundwallright');
+    platforms.create(1125, 325, 'groundwallright');
+    icy_platforms.create(600, 750, 'icyground');
+    icy_platforms.create(400, 750, 'icyground');
+    platforms.create(25, 500, 'groundwallleft'); 
+    platforms.create(25, 300, 'groundwallleft');
+    snowy_platforms.create(250, 150, 'snowyground');
+    snowy_platforms.create(450, 150, 'snowyground');
+    icy_platforms.create(650, 150, 'icyground');
+    icy_platforms.create(850, 150, 'icyground');
+    icy_platforms.create(1050, 150, 'icyground');
+    icy_platforms.create(1250, 150, 'icyground');
+    icy_platforms.create(1450, 150, 'icyground');
+    icy_platforms.create(1650, 150, 'icyground');
+    icy_platforms.create(1850, 150, 'icyground');
+    platforms.create(1925, 275, 'groundwallleft'); 
+    platforms.create(1925, 475, 'groundwallleft'); 
+    platforms.create(1925, 675, 'groundwallleft'); 
+    platforms.create(1925, 875, 'groundwallleft'); 
+    platforms.create(1925, 1075, 'groundwallleft');
+    platforms.create(2000, 1200, 'ground');
+    platforms.create(2200, 1200, 'ground');
+    snowy_platforms.create(2400, 1200, 'snowyground');
+    icy_platforms.create(2600, 1200, 'icyground');
+    platforms.create(2800, 1200, 'ground');
+    platforms.create(2990, 1050, 'ground');
+    snowy_platforms.create(2925, 875, 'snowyground');
+    snowy_platforms.create(2990, 700, 'snowyground');
+    icy_platforms.create(2925, 525, 'icyground');
+    icy_platforms.create(2990, 350, 'icyground')
+    icy_platforms.create(2925, 175, 'icyground')
+    platforms.create(2800, 950, 'groundwallleft');
+    platforms.create(2800, 750, 'groundwallleft');
+    platforms.create(2800, 550, 'groundwallleft');
+    platforms.create(2800, 350, 'groundwallleft');
+    platforms.create(2800, 150, 'groundwallleft');
+    platforms.create(2800, -50, 'groundwallleft');
+    platforms.create(3115, 1340, 'groundwallright');
+    platforms.create(3115, 1140, 'groundwallright');
+    platforms.create(3115, 940, 'groundwallright');
+    platforms.create(3115, 740, 'groundwallright');
+    platforms.create(3115, 540, 'groundwallright');
+    platforms.create(3115, 340, 'groundwallright');
+    platforms.create(3115, 140, 'groundwallright');
+    platforms.create(3115, -60, 'groundwallright');
     
-    // Personnage et ennemi
     
-    player = this.physics.add.sprite(100, 650, 'player');
+    // Personnage
+    
+    player = this.physics.add.sprite(100, 1370, 'player');
     player.setCollideWorldBounds(true);
     
-    enemy = this.physics.add.group();
-    enemy.create(200, 650, 'flocon1');
     
+    // Ennemis
+    
+    enemy = this.physics.add.group();
+    enemy1 = enemy.create(800, 1200, 'flocon1');
+    enemy1.body.setAllowGravity(false);
+    enemy2 = enemy.create(900, 800, 'flocon1');
+    enemy2.body.setAllowGravity(false);
+    enemy3 = enemy.create(900, 600, 'flocon2');
+    enemy3.body.setAllowGravity(false);
+    enemy4 = enemy.create(75, 250, 'flocon2');
+    enemy4.body.setAllowGravity(false);
+    enemy5 = enemy.create(75, 550, 'flocon2');
+    enemy5.body.setAllowGravity(false);
+    enemy6 = enemy.create(200, 50, 'flocon2');
+    enemy6.body.setAllowGravity(false);
+    enemy7 = enemy.create(2000, 100, 'flocon3');
+    enemy7.body.setAllowGravity(false);
+    enemy8 = enemy.create(2050, 350, 'flocon3');
+    enemy8.body.setAllowGravity(false);
+    enemy9 = enemy.create(2100, 450, 'flocon3');
+    enemy9.body.setAllowGravity(false);
+    enemy10 = enemy.create(2200, 550, 'flocon3');
+    enemy10.body.setAllowGravity(false);
+    enemy11 = enemy.create(1975, 650, 'flocon3');
+    enemy11.body.setAllowGravity(false);
+    enemy12 = enemy.create(2000, 750, 'flocon3');
+    enemy12.body.setAllowGravity(false);
+    enemy13 = enemy.create(2200, 850, 'flocon3');
+    enemy13.body.setAllowGravity(false);
+    enemy14 = enemy.create(2150, 950, 'flocon3');
+    enemy14.body.setAllowGravity(false);
+    enemy15 = enemy.create(2850, 925, 'flocon4');
+    enemy15.body.setAllowGravity(false);
+    enemy16 = enemy.create(3060, 750, 'flocon4');
+    enemy16.body.setAllowGravity(false);
+    enemy17 = enemy.create(2850, 575, 'flocon4');
+    enemy17.body.setAllowGravity(false);
+    enemy18 = enemy.create(3060, 400, 'flocon4');
+    enemy18.body.setAllowGravity(false);
+    enemy19 = enemy.create(2850, 225, 'flocon4');
+    enemy19.body.setAllowGravity(false);
     
     // Power-up
     
     powerUp = this.physics.add.staticGroup();
-    powerUp.create(50, 650, 'powerUp');
+    powerUp.create(2100, 1163, 'powerUp');
     
     
     // Interface
@@ -190,6 +278,180 @@ function create ()
     this.physics.add.collider(powerUp, snowy_platforms);
     this.physics.add.collider(powerUp, icy_platforms);
     this.physics.add.overlap(player, powerUp, collectPowerUp);
+    
+    
+    // Animation ennemis
+    
+    var tween = this.tweens.add({
+        targets: enemy1,
+        x: 500,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy2,
+        x: 700,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy3,
+        x: 600,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy4,
+        x: 200,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy5,
+        x: 200,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy6,
+        x: 600,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy7,
+        x: 2300,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy8,
+        x: 2500,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy9,
+        x: 2700,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy10,
+        x: 2600,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy11,
+        x: 2700,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy12,
+        x: 2500,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy13,
+        x: 2700,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy14,
+        x: 2700,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy15,
+        x: 3060,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy16,
+        x: 2850,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+
+    var tween = this.tweens.add({
+        targets: enemy17,
+        x: 3060,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy18,
+        x: 2850,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
+    
+    var tween = this.tweens.add({
+        targets: enemy19,
+        x: 3060,
+        yoyo: true,
+        repeat: -1,
+        ease:'Linear',
+        duration:3000
+    });
     
     
     // Animation barre de vie
@@ -384,31 +646,32 @@ function update ()
         {
             this.physics.pause();
             barreDeVie.anims.play('dead');
-            player.visible = false;
+            player.destroy();
             gameOver = true;
         }
+    
+    if (player.y >= 1420)
+    {
+        vieJoueur = 0;
+    }
 }
   
     
 // Collision ennemis
     
 function hitEnemy (player, enemy)
-{
+{   
+    if (player.body.touching.down)
+    {
+        enemy.destroy();
+        recovery = true;
+    }
+    
     if (vieJoueur > 0 && recovery == false)
     {
         vieJoueur = vieJoueur - 1
         recovery = true;
     }
-}
-    
-    
-// Collecte du power-up
-    
-function collectPowerUp (player, powerUp)
-{
-    powerUp.disableBody(true, true);
-    powerUpSlot.setTexture('powerUpSlotOn');
-    boots = true;
 }
     
     
@@ -428,6 +691,17 @@ function setIcyGroundValue (player, icy_platforms)
 {
     groundValue = 2;
 }
+ 
+    
+// Collecte du power-up
+    
+function collectPowerUp (player, powerUp)
+{
+    powerUp.disableBody(true, true);
+    powerUpSlot.setTexture('powerUpSlotOn');
+    boots = true;
+}
+    
     
 </script>
 
