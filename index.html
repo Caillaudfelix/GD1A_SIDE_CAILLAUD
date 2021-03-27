@@ -37,16 +37,17 @@ var config = {
 // Variables
 
 var game = new Phaser.Game(config);
-var paddle;
-var paddleConnected = false;
+var xAxis;
+var yAxis;
 var player;
 var platforms;
+var groundValue = 0;
 var barreDeVie;
 var vieJoueur = 3;
 var recovery = false;
 var timerRecovery = 0;
 var powerUp;
-var powerUpTime;
+var boots = false;
 var cursors;
 var toucheSol = false;
 var doubleJump = false;
@@ -104,7 +105,7 @@ function create ()
     
     platforms.create(100, 800, 'ground').refreshBody();
     platforms.create(300, 800, 'ground').refreshBody();
-    snowy_platforms.create(500, 800, 'snowyground').refreshBody();
+    snowy_platforms.create(500, 800, 'snowyground');
     icy_platforms.create(600, 400, 'icyground');
     platforms.create(50, 250, 'ground');
     platforms.create(750, 220, 'ground');
@@ -149,6 +150,13 @@ function create ()
     });
 
     this.anims.create({
+        key: 'leftSlow',
+        frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
+        frameRate: 5,
+        repeat: -1
+    });
+
+    this.anims.create({
         key: 'turn',
         frames: [ { key: 'player', frame: 4 } ],
         frameRate: 20
@@ -161,13 +169,20 @@ function create ()
         repeat: -1
     });
 
+    this.anims.create({
+        key: 'rightSlow',
+        frames: this.anims.generateFrameNumbers('player', { start: 5, end: 8 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
     
     // Collisions
     
-    this.physics.add.collider(player, platforms, resetJump);
-    this.physics.add.collider(player, snowy_platforms, resetJump);
-    this.physics.add.collider(player, icy_platforms, resetJump);
-    this.physics.add.collider(enemy, player, hitEnemy);
+    this.physics.add.collider(player, platforms, setGroundValue);
+    this.physics.add.collider(player, snowy_platforms, setSnowyGroundValue);
+    this.physics.add.collider(player, icy_platforms, setIcyGroundValue);
+    this.physics.add.overlap(player, enemy, hitEnemy);
     this.physics.add.collider(enemy, platforms);
     this.physics.add.collider(enemy, snowy_platforms);
     this.physics.add.collider(enemy, icy_platforms);
@@ -176,6 +191,8 @@ function create ()
     this.physics.add.collider(powerUp, icy_platforms);
     this.physics.add.overlap(player, powerUp, collectPowerUp);
     
+    
+    // Animation barre de vie
     
     this.anims.create({
         key: 'alive',
@@ -200,34 +217,96 @@ function create ()
 ;}
 
     
-    // Update
+// Update
     
 function update ()
 {
+    
+    
+    // Inputs manette
+    
+    let pad = Phaser.Input.Gamepad.Gamepad;
 
+    if(this.input.gamepad.total){
+        pad = this.input.gamepad.getPad(0)
+        xAxis = pad ? pad.axes[0].getValue() : 0;
+        yAxis = pad ? pad.axes[1].getValue() : 0;
+    }
+
+    
+    // Déplacement
     
     if (gameOver)
     {
         return;
     }
 
-    if (cursors.left.isDown)
+    if (cursors.left.isDown || pad.left == 1 || xAxis < 0)
     {
-        player.setVelocityX(-160);
+        if (groundValue == 1 && player.body.touching.down && !boots)
+        {
+            player.setVelocityX(-80);
+            player.anims.play('leftSlow', true);
+        }
+        else if
+            (groundValue == 2 && player.body.touching.down && !boots)
+        {
+            player.setAccelerationX(-300);
+            player.anims.play('left', true);
+        }
+        else
+        {
+            player.setVelocityX(-160);
 
-        player.anims.play('left', true);
+            player.anims.play('left', true);  
+        }
+
     }
-    else if (cursors.right.isDown)
+    else if (cursors.right.isDown || pad.right == 1 || xAxis > 0)
     {
-        player.setVelocityX(160);
+        if (groundValue == 1 && player.body.touching.down && !boots)
+        {
+            player.setVelocityX(80);
+            player.anims.play('rightSlow', true);   
+        }
+        else if
+            (groundValue == 2 && player.body.touching.down && !boots)
+        {
+            player.setAccelerationX(300);
+            player.anims.play('right', true);
+        }
+        else
+        {
+            player.setVelocityX(160);
 
-        player.anims.play('right', true);
+            player.anims.play('right', true);
+        }
     }
     else
     {
-        player.setVelocityX(0);
+        if (groundValue == 2 && player.body.touching.down & !boots)
+        {
+            if(player.body.velocity.x < 0){
+                player.setAccelerationX(300);
+            }
 
+            else if(player.body.velocity.x > 0)
+            {
+                player.setAccelerationX(-300);
+            }
+
+            else
+            {
+                player.setVelocityX(0);
+                player.setAccelerationX(0);
+                player.anims.play('turn');
+            }
+        }
+        else{
+        player.setVelocityX(0);
+        player.setAccelerationX(0);
         player.anims.play('turn');
+        }
     }
 
     if (cursors.up.isDown && player.body.touching.down)
@@ -235,90 +314,22 @@ function update ()
         player.setVelocityY(-330);
     }
     
-    this.input.gamepad.once('connected', function (pad) {
-        paddleConnected = true;
-        paddle = pad;
-    });
-
-    if (paddleConnected == true)
-    {
-        if (paddle.A && player.body.touching.down)
-        {
-        player.setVelocityY(-330);
-        }
-
-        else if (paddle.R2 && player.body.touching.down)
-        {
-            player.setVelocityX(160);
-            player.anims.play('right', true);
-        }
-
-        else if (paddle.R2 && !player.body.touching.down)
-        {
-            player.setVelocityX(160);
-            player.anims.play('rightjump', true);
-        }
-
-        else if (paddle.L2 && player.body.touching.down)
-        {
-            player.setVelocityX(-160);
-            player.anims.play('left', true);
-        }
-
-        else if (paddle.L2 && !player.body.touching.down)
-        {
-            player.setVelocityX(-160);
-            player.anims.play('leftjump', true);
-        }
-
-        else if (cursors.left.isDown)
-        {
-            player.setVelocityX(-160);
-
-            player.anims.play('left', true);
-        }
-        else if (cursors.right.isDown)
-        {
-            player.setVelocityX(160);
-
-            player.anims.play('right', true);
-        }
-        else
-        {
-            player.setVelocityX(0);
-
-            player.anims.play('turn');
-        }
-    }
-     else if (cursors.left.isDown)
-        {
-            player.setVelocityX(-160);
-
-            player.anims.play('left', true);
-        }
-        else if (cursors.right.isDown)
-        {
-            player.setVelocityX(160);
-
-            player.anims.play('right', true);
-        }
-        else
-        {
-            player.setVelocityX(0);
-
-            player.anims.play('turn');
-        }
     
-    if (cursors.up.isDown && toucheSol == true){
+    // Inputs double saut / saut mural
+    
+    if (cursors.up.isDown && toucheSol == true)
+    {
         toucheSol = false;
         player.setVelocityY(-330);
     }
 
-    if (cursors.up.isUp && toucheSol == false && finDoubleJump == false){
+    if (cursors.up.isUp && toucheSol == false && finDoubleJump == false)
+    {
         doubleJump = true;
     }
 
-    if (cursors.up.isDown && doubleJump == true){
+    if (cursors.up.isDown && doubleJump == true)
+    {
         player.setVelocityY(-330);
         finDoubleJump = true;
         doubleJump = false;
@@ -327,20 +338,19 @@ function update ()
     
     // Barre de vie
 
-    if(recovery == true){
+    if(recovery == true)
+    {
         timerRecovery = timerRecovery + 1
-        if(timerRecovery >= 50){
+        if(timerRecovery >= 50)
+        {
             recovery = false
             timerRecovery = 0
         }
     }
-}
-
     
-// Double saut / saut mural    
     
-function resetJump (player, platforms)
-{
+    // Double saut / saut mural
+    
     if (player.body.touching.down)
         {
             toucheSol = true;
@@ -351,42 +361,72 @@ function resetJump (player, platforms)
         {
             toucheSol = true;
         }
-}
     
     
-// Collision ennemis
+        // Perte de vie / mort
     
-function hitEnemy (enemy, player)
-    {
-        if (vieJoueur > 0 && recovery == false){
-            vieJoueur = vieJoueur - 1
-            recovery = true;
-        }
-
-        if(vieJoueur == 3){
+        if(vieJoueur == 3)
+        {
             barreDeVie.anims.play('alive');
-
         }
 
-        else if (vieJoueur == 2){
+        else if (vieJoueur == 2)
+        {
             barreDeVie.anims.play('hurt');
         }
 
-        else if (vieJoueur == 1){
+        else if (vieJoueur == 1)
+        {
             barreDeVie.anims.play('critical');
         }
 
-        else if (vieJoueur <= 0){
+        else if (vieJoueur <= 0)
+        {
+            this.physics.pause();
             barreDeVie.anims.play('dead');
+            player.visible = false;
             gameOver = true;
-      }
-   
+        }
 }
+  
+    
+// Collision ennemis
+    
+function hitEnemy (player, enemy)
+{
+    if (vieJoueur > 0 && recovery == false)
+    {
+        vieJoueur = vieJoueur - 1
+        recovery = true;
+    }
+}
+    
+    
+// Collecte du power-up
     
 function collectPowerUp (player, powerUp)
 {
     powerUp.disableBody(true, true);
     powerUpSlot.setTexture('powerUpSlotOn');
+    boots = true;
+}
+    
+    
+// Activation sols spéciaux    
+    
+function setGroundValue (player, platforms)
+{
+    groundValue = 0;
+}
+    
+function setSnowyGroundValue (player, snowy_platforms)
+{
+    groundValue = 1;
+}
+    
+function setIcyGroundValue (player, icy_platforms)
+{
+    groundValue = 2;
 }
     
 </script>
