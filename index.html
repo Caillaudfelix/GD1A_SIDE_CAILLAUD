@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8" />
-    <title>index</title>
+    <title>Snowflakes Hunter</title>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
     <style type="text/css">
         body {
@@ -22,7 +22,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 300 },
-            debug: true
+            debug: false
         }
     },
     input:{gamepad:true},
@@ -60,16 +60,13 @@ var gameOver = false;
 function preload ()
 {
     this.load.image('background', 'assets/background.png');
+    this.load.image('victory', 'assets/victory.png');
     this.load.spritesheet('player', 'assets/player.png', { frameWidth: 28, frameHeight: 38 });
     this.load.image('ground', 'assets/normal_sol.png');
     this.load.image('groundwallleft', 'assets/normal_mur_gauche.png');
     this.load.image('groundwallright', 'assets/normal_mur_droite.png');
     this.load.image('snowyground', 'assets/neige_sol.png');
-    this.load.image('snowygroundwallleft', 'assets/neige_mur_gauche.png');
-    this.load.image('snowygroundwallright', 'assets/neige_mur_droite.png');
     this.load.image('icyground', 'assets/glace_sol.png');
-    this.load.image('icygroundwallleft', 'assets/glace_mur_gauche.png');
-    this.load.image('icygroundwallright', 'assets/glace_mur_droite.png');
     this.load.image('powerUpSlotOff', 'assets/power_up_slot_off.png')
     this.load.image('powerUpSlotOn', 'assets/power_up_slot_on.png')
     this.load.image('powerUp', 'assets/powerup.png');
@@ -78,6 +75,7 @@ function preload ()
     this.load.image('flocon2', 'assets/flocon2.png');
     this.load.image('flocon3', 'assets/flocon3.png');
     this.load.image('flocon4', 'assets/flocon4.png');
+    this.load.image('flag', 'assets/flag.png');
 }
     
     
@@ -143,7 +141,7 @@ function create ()
     snowy_platforms.create(2990, 700, 'snowyground');
     icy_platforms.create(2925, 525, 'icyground');
     icy_platforms.create(2990, 350, 'icyground')
-    icy_platforms.create(2925, 175, 'icyground')
+    platforms.create(2925, 175, 'ground')
     platforms.create(2800, 950, 'groundwallleft');
     platforms.create(2800, 750, 'groundwallleft');
     platforms.create(2800, 550, 'groundwallleft');
@@ -162,7 +160,7 @@ function create ()
     
     // Personnage
     
-    player = this.physics.add.sprite(100, 1370, 'player');
+    player = this.physics.add.sprite(2900, 150, 'player');
     player.setCollideWorldBounds(true);
     
     
@@ -208,10 +206,16 @@ function create ()
     enemy19 = enemy.create(2850, 225, 'flocon4');
     enemy19.body.setAllowGravity(false);
     
+    
     // Power-up
     
     powerUp = this.physics.add.staticGroup();
     powerUp.create(2100, 1163, 'powerUp');
+    
+    
+    // Drapeau pour finir le niveau
+    
+    flag = this.physics.add.sprite(2860, 100, 'flag');
     
     
     // Interface
@@ -278,6 +282,8 @@ function create ()
     this.physics.add.collider(powerUp, snowy_platforms);
     this.physics.add.collider(powerUp, icy_platforms);
     this.physics.add.overlap(player, powerUp, collectPowerUp);
+    this.physics.add.collider(flag, platforms);
+    this.physics.add.overlap(player, flag, finishLevel);
     
     
     // Animation ennemis
@@ -475,6 +481,11 @@ function create ()
         key: 'dead',
         frames: [ { key: 'vie', frame: 3. } ],
     });
+
+    
+    // Écran de victoire
+    
+    victory = this.add.image(1220, 720, 'victory').setVisible(false);
     
 ;}
 
@@ -702,6 +713,14 @@ function collectPowerUp (player, powerUp)
     boots = true;
 }
     
+    
+// Fin du niveau
+    
+function finishLevel (player, flag)
+{
+    player.disableBody(true, true);
+    victory.visible = true;
+}
     
 </script>
 
